@@ -20,8 +20,8 @@ x = 100
 # Player
 player_surf = pygame.image.load(join('sprites', 'player.png')).convert_alpha()
 player_rect = player_surf.get_frect(center = (WIDTH / 2, HEIGHT / 2))
-player_direction = pygame.math.Vector2(1, 1)
-player_speed = 200
+player_direction = pygame.math.Vector2()
+player_speed = 300
 
 # Stars
 star_surf = pygame.image.load(join('sprites', 'star.png')).convert_alpha()
@@ -50,6 +50,17 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        # if event.type == pygame.KEYDOWN:
+            # print(event.key)
+        # if event.type == pygame.MOUSEMOTION:
+            # player_rect.center = event.pos
+        
+    # input
+    keys = pygame.key.get_pressed()
+    player_direction.x = int(keys[pygame.K_d]) - int(keys[pygame.K_a])
+    player_direction.y = int(keys[pygame.K_s]) - int(keys[pygame.K_w])
+    player_direction = player_direction.normalize() if player_direction else player_direction
+    player_rect.center += player_direction * player_speed * dt
 
 
     # draw the game, drawing matters in lines, display background first, then stars, then ship
@@ -65,13 +76,6 @@ while running:
 
     display_surface.blit(asteroid_surf, asteroid_rect)
     display_surface.blit(laser_surf, laser_rect)
-
-    # Player Movement
-    if player_rect.bottom >= HEIGHT or player_rect.top <= 0:
-        player_direction.y *= -1
-    if player_rect.right >= WIDTH or player_rect.left <= 0:
-        player_direction.x *= -1
-    player_rect.center += player_direction * player_speed * dt
     display_surface.blit(player_surf, player_rect)
 
     pygame.display.update()
