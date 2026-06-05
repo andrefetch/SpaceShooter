@@ -3,10 +3,39 @@ from os.path import join
 from random import randint
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, groups):
+        super().__init__(groups)
         self.image = pygame.image.load(join('sprites', 'player.png')).convert_alpha()
         self.rect = self.image.get_frect(center = (WIDTH / 2, HEIGHT / 2))
+        self.direction = pygame.Vector2()
+        self.speed = 300
+    
+    def update(self, dt):
+        keys = pygame.key.get_pressed()
+        self.direction.x = int(keys[pygame.K_d]) - int(keys[pygame.K_a])
+        self.direction.y = int(keys[pygame.K_s]) - int(keys[pygame.K_w])
+        self.direction = self.direction.normalize() if self.direction else self.direction
+        self.rect.center += self.direction * self.speed * dt
+
+        recent_keys = pygame.key.get_just_pressed()
+        if recent_keys[pygame.K_SPACE]:
+            print('fire laser')
+
+class Star(pygame.sprite.Sprite):
+    def __init__(self, groups):
+        super().__init__(groups)
+        self.image = pygame.image.load(join('sprites', 'star.png')).convert_alpha()
+        self.rect = self.image.get_frect(center = (randint(0, WIDTH), randint(0, HEIGHT)))
+
+        self.speed = randint(50, 500)
+    
+    def update(self, dt):
+        self.rect.y += self.speed * dt
+
+        if self.rect.top > HEIGHT:
+            self.rect.bottom = 0
+            self.rect.x = randint(0, WIDTH)
+
 
 # General Setup
 pygame.init() 
@@ -23,18 +52,13 @@ surf = pygame.Surface(( 100, 200 ))
 surf.fill('orange')
 x = 100
 
-player = Player()
+star_sprites = pygame.sprite.Group()
+all_sprites = pygame.sprite.Group()
 
-# Player
-# player_surf = pygame.image.load(join('sprites', 'player.png')).convert_alpha()
-# player_rect = player_surf.get_frect(center = (WIDTH / 2, HEIGHT / 2))
-# player_direction = pygame.math.Vector2()
-# player_speed = 300
+for _ in range(40):
+    Star([star_sprites, all_sprites])
 
-# Stars
-star_surf = pygame.image.load(join('sprites', 'star.png')).convert_alpha()
-star_positions = [[randint(0, WIDTH), randint(0, HEIGHT)] for i in range(20)]
-star_speed = 300
+player = Player(all_sprites)
 
 # Asteroid
 asteroid_surf = pygame.image.load(join('sprites', 'asteroid.png')).convert_alpha()
@@ -48,7 +72,6 @@ laser_rect = laser_surf.get_frect(bottomleft = (20, HEIGHT - 20))
 background_surf = pygame.image.load(join('sprites', 'background.png'))
 background_surf = pygame.transform.scale(background_surf, (WIDTH, HEIGHT))
 
-
 # Drawing Screen
 while running:
 
@@ -58,38 +81,19 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        # if event.type == pygame.KEYDOWN:
-            # print(event.key)
-        # if event.type == pygame.MOUSEMOTION:
-            # player_rect.center = event.pos
         
     # input
     keys = pygame.key.get_pressed()
-    # player_direction.x = int(keys[pygame.K_d]) - int(keys[pygame.K_a])
-    # player_direction.y = int(keys[pygame.K_s]) - int(keys[pygame.K_w])
-    # player_direction = player_direction.normalize() if player_direction else player_direction
-    # player_rect.center += player_direction * player_speed * dt
 
-    recent_keys = pygame.key.get_just_pressed()
-    if recent_keys[pygame.K_SPACE]:
-        print("Laser!")
-
+    all_sprites.update(dt)
 
     # draw the game, drawing matters in lines, display background first, then stars, then ship
     # display_surface.fill('darkgray')
     display_surface.blit(background_surf, (0, 0))
+    
+    star_sprites.draw(display_surface)
+    all_sprites.draw(display_surface)
 
-    for pos in star_positions:
-        pos[1] += star_speed * dt
-        if pos[1] > HEIGHT:
-            pos[1] = 0
-            pos[0] = randint(0, WIDTH)
-        display_surface.blit(star_surf, pos)
-
-    display_surface.blit(asteroid_surf, asteroid_rect)
-    display_surface.blit(laser_surf, laser_rect)
-    # display_surface.blit(player_surf, player_rect)
-    display_surface.blit(player.image, player.rect)
     pygame.display.update()
 
 pygame.quit()
