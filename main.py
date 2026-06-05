@@ -22,7 +22,7 @@ class Player(pygame.sprite.Sprite):
             if current_time - self.laser_shoot_time >= self.cooldown_duration:
                 self.can_shoot = True
     
-    def update(self, dt):
+    def update(self, dt: float):
         keys = pygame.key.get_pressed()
         self.direction.x = int(keys[pygame.K_d]) - int(keys[pygame.K_a])
         self.direction.y = int(keys[pygame.K_s]) - int(keys[pygame.K_w])
@@ -45,7 +45,7 @@ class Star(pygame.sprite.Sprite):
 
         self.speed = randint(50, 500)
     
-    def update(self, dt):
+    def update(self, dt: float):
         self.rect.y += self.speed * dt
 
         if self.rect.top > HEIGHT:
@@ -53,7 +53,7 @@ class Star(pygame.sprite.Sprite):
             self.rect.x = randint(0, WIDTH)
 
 class Laser(pygame.sprite.Sprite):
-    def __init__(self, surf, pos, groups):
+    def __init__(self, surf: str, pos: int, groups):
         super().__init__(groups)
         self.image = surf
         self.rect = self.image.get_frect(midbottom = pos)
@@ -64,7 +64,7 @@ class Laser(pygame.sprite.Sprite):
             self.kill()
 
 class Asteroid(pygame.sprite.Sprite):
-    def __init__(self, surf, pos, groups):
+    def __init__(self, surf: str, pos: int, groups):
         super().__init__(groups)
         self.image = surf
         self.rect = self.image.get_frect(center = pos)
@@ -73,7 +73,7 @@ class Asteroid(pygame.sprite.Sprite):
         self.direction = pygame.Vector2(uniform(-0.5, 0.5), 1)
         self.speed = randint(400, 500)
     
-    def update(self, dt):
+    def update(self, dt: float):
         self.rect.center += self.direction * self.speed * dt
         if pygame.time.get_ticks() - self.start_time >= self.lifetime:
             self.kill()
