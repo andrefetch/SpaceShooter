@@ -36,7 +36,6 @@ class Star(pygame.sprite.Sprite):
             self.rect.bottom = 0
             self.rect.x = randint(0, WIDTH)
 
-
 # General Setup
 pygame.init() 
 WIDTH = 1280
@@ -55,6 +54,7 @@ x = 100
 star_sprites = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 
+star_surf = 
 for _ in range(40):
     Star([star_sprites, all_sprites])
 
@@ -90,7 +90,7 @@ while running:
     # draw the game, drawing matters in lines, display background first, then stars, then ship
     # display_surface.fill('darkgray')
     display_surface.blit(background_surf, (0, 0))
-    
+
     star_sprites.draw(display_surface)
     all_sprites.draw(display_surface)
 
