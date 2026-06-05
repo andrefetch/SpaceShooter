@@ -1,6 +1,6 @@
 import pygame
 from os.path import join
-from random import randint
+from random import randint, uniform
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups):
@@ -68,6 +68,15 @@ class Asteroid(pygame.sprite.Sprite):
         super().__init__(groups)
         self.image = surf
         self.rect = self.image.get_frect(center = pos)
+        self.start_time = pygame.time.get_ticks()
+        self.lifetime = 3000
+        self.direction = pygame.Vector2(uniform(-0.5, 0.5), 1)
+        self.speed = randint(400, 500)
+    
+    def update(self, dt):
+        self.rect.center += self.direction * self.speed * dt
+        if pygame.time.get_ticks() - self.start_time >= self.lifetime:
+            self.kill()
 
 # General Setup
 pygame.init() 
@@ -79,6 +88,13 @@ pygame.display.set_caption('Space Shooter')
 running = True
 clock = pygame.time.Clock()
 
+# Imports
+asteroid_surf = pygame.image.load(join('sprites', 'asteroid.png')).convert_alpha()
+laser_surf = pygame.image.load(join('sprites', 'laser.png')).convert_alpha()
+background_surf = pygame.image.load(join('sprites', 'background.png'))
+background_surf = pygame.transform.scale(background_surf, (WIDTH, HEIGHT))
+
+# Sprites
 star_sprites = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 
@@ -86,16 +102,6 @@ for _ in range(40):
     Star([star_sprites, all_sprites])
 
 player = Player(all_sprites)
-
-# Asteroid
-asteroid_surf = pygame.image.load(join('sprites', 'asteroid.png')).convert_alpha()
-
-# Laser
-laser_surf = pygame.image.load(join('sprites', 'laser.png')).convert_alpha()
-
-# Background
-background_surf = pygame.image.load(join('sprites', 'background.png'))
-background_surf = pygame.transform.scale(background_surf, (WIDTH, HEIGHT))
 
 # Custom events -- Meteors / Asteroids
 asteroid_event = pygame.event.custom_type()
@@ -111,7 +117,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == asteroid_event:
-            print('create asteroid')
+            x, y = randint(0, WIDTH), randint(-200, -100)
+            Asteroid(asteroid_surf, (x, y), all_sprites)
         
     # input
     keys = pygame.key.get_pressed()
