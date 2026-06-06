@@ -40,6 +40,9 @@ class Player(pygame.sprite.Sprite):
         self.direction = self.direction.normalize() if self.direction else self.direction
         self.rect.center += self.direction * self.speed * dt
 
+        # Bounding detection, so players can't move off the screen !
+        self.rect.clamp_ip(pygame.FRect(0, 0, WIDTH, HEIGHT))
+
         recent_keys = pygame.key.get_just_pressed()
         if recent_keys[pygame.K_SPACE] and self.can_shoot:
             Laser(self.laser_surf, self.rect.midtop, self.laser_groups)
