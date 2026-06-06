@@ -105,7 +105,6 @@ class Asteroid(pygame.sprite.Sprite):
         self.image = pygame.transform.rotozoom(self.orig_surf, self.rotation, 1)
         self.rect = self.image.get_frect(center=self.rect.center)
 
-
 class AnimatedExplosion(pygame.sprite.Sprite):
     def __init__(self, frames, pos, groups):
         super().__init__(groups)
