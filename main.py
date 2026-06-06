@@ -91,6 +91,13 @@ def collisions():
         if collied_sprites:
             laser.kill()
 
+def display_score():
+    current_time = pygame.time.get_ticks() // 100
+    text_surf = font.render(str(current_time), False, "#d4d4d4")
+    text_rect = text_surf.get_frect(midbottom = (WIDTH / 2, HEIGHT - 50))
+    display_surface.blit(text_surf, text_rect)
+    pygame.draw.rect(display_surface, "#d4d4d4", text_rect.inflate(20, 30), 5, 10)
+
 # General Setup
 pygame.init() 
 WIDTH = 1280
@@ -106,6 +113,9 @@ asteroid_surf = pygame.image.load(join('sprites', 'asteroid.png')).convert_alpha
 laser_surf = pygame.image.load(join('sprites', 'laser.png')).convert_alpha()
 background_surf = pygame.image.load(join('sprites', 'background.png'))
 background_surf = pygame.transform.scale(background_surf, (WIDTH, HEIGHT))
+
+# Font Rendering
+font = pygame.font.Font(join('sprites', 'HomeVideo.ttf'), 40)
 
 # Sprites
 star_sprites = pygame.sprite.Group()
@@ -145,10 +155,11 @@ while running:
     # draw the game, drawing matters in lines, display background first, then stars, then ship
     # display_surface.fill('darkgray')
     display_surface.blit(background_surf, (0, 0))
-
-    star_sprites.draw(display_surface)
-    all_sprites.draw(display_surface)
     
+    star_sprites.draw(display_surface)
+    display_score()
+    all_sprites.draw(display_surface)
+   
     pygame.display.update()
 
 pygame.quit()
