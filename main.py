@@ -17,8 +17,10 @@ class Player(pygame.sprite.Sprite):
 
         # Mask
         self.mask = pygame.mask.from_surface(self.image)
-        
 
+        # Transformation
+        self.rotation = 0
+        
     def laser_timer(self):
         if not self.can_shoot:
             current_time = pygame.time.get_ticks()
@@ -73,12 +75,15 @@ class Laser(pygame.sprite.Sprite):
 class Asteroid(pygame.sprite.Sprite):
     def __init__(self, surf: str, pos: int, groups):
         super().__init__(groups)
-        self.image = surf
+        self.orig_surf = surf
+        self.image = self.orig_surf
         self.rect = self.image.get_frect(center = pos)
         self.start_time = pygame.time.get_ticks()
         self.lifetime = 3000
         self.direction = pygame.Vector2(uniform(-0.5, 0.5), 1)
         self.speed = randint(400, 500)
+        self.rotation = 0
+        self.rotation_speed = randint(10, 30)
 
         # Mask
         self.mask = pygame.mask.from_surface(self.image)
@@ -87,19 +92,40 @@ class Asteroid(pygame.sprite.Sprite):
         self.rect.center += self.direction * self.speed * dt
         if pygame.time.get_ticks() - self.start_time >= self.lifetime:
             self.kill()
+        
+        # Rotations
+        self.rotation += self.rotation_speed * dt
+        self.image = pygame.transform.rotozoom(self.orig_surf, self.rotation, 1)
+        self.rect = self.image.get_frect(center = self.rect.center)
+
+class AnimatedExplosion(pygame.sprite.Sprite):
+    def __init__(self, frames, pos, groups):
+        super().__init__(groups)
+        self.frames = frames
+        self.frame_index = 0
+        self.image = self.frames[self.frame_index]
+        self.rect = self.image.get_frect(center = pos)
+    
+    def update(self, dt):
+        self.frame_index += 20 * dt
+        if self.frame_index < len(self.frames):
+            self.image = self.frames[int(self.frame_index)]
+        else:
+            self.kill()
 
 def collisions():
 
     global running
 
-    collision_sprites = pygame.sprite.spritecollide(player, asteroid_sprites, True)
+    collision_sprites = pygame.sprite.spritecollide(player, asteroid_sprites, True, pygame.sprite.collide_mask)
     if collision_sprites:
         running = False
 
     for laser in laser_sprites:
-        collied_sprites = pygame.sprite.spritecollide(laser, asteroid_sprites, True)
+        collied_sprites = pygame.sprite.spritecollide(laser, asteroid_sprites, True, pygame.sprite.collide_mask)
         if collied_sprites:
             laser.kill()
+            AnimatedExplosion(explosion_frames, laser.rect.midtop, all_sprites)
 
 def display_score():
     current_time = pygame.time.get_ticks() // 100
@@ -123,6 +149,7 @@ asteroid_surf = pygame.image.load(join('sprites', 'asteroid.png')).convert_alpha
 laser_surf = pygame.image.load(join('sprites', 'laser.png')).convert_alpha()
 background_surf = pygame.image.load(join('sprites', 'background.png'))
 background_surf = pygame.transform.scale(background_surf, (WIDTH, HEIGHT))
+explosion_frames = [pygame.image.load(join('sprites', 'explosion', f'{i}.png')).convert_alpha() for i in range(12)]
 
 # Font Rendering
 font = pygame.font.Font(join('sprites', 'HomeVideo.ttf'), 40)
@@ -140,7 +167,7 @@ player = Player(all_sprites)
 
 # Custom events -- Meteors / Asteroids
 asteroid_event = pygame.event.custom_type()
-pygame.time.set_timer(asteroid_event, randint(100, 300))
+pygame.time.set_timer(asteroid_event, randint(150, 300))
 
 # Drawing Screen
 while running:
