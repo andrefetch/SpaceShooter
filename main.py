@@ -97,6 +97,7 @@ background_surf = pygame.transform.scale(background_surf, (WIDTH, HEIGHT))
 # Sprites
 star_sprites = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
+asteroid_sprites = pygame.sprite.Group()
 
 for _ in range(40):
     Star([star_sprites, all_sprites])
@@ -118,12 +119,16 @@ while running:
             running = False
         if event.type == asteroid_event:
             x, y = randint(0, WIDTH), randint(-200, -100)
-            Asteroid(asteroid_surf, (x, y), all_sprites)
+            Asteroid(asteroid_surf, (x, y), (all_sprites, asteroid_sprites))
         
     # input
     keys = pygame.key.get_pressed()
 
+    # update
     all_sprites.update(dt)
+    collision_sprites = pygame.sprite.spritecollide(player, asteroid_sprites, True)
+    if collision_sprites:
+        print(collision_sprites[0])
 
     # draw the game, drawing matters in lines, display background first, then stars, then ship
     # display_surface.fill('darkgray')
@@ -131,6 +136,9 @@ while running:
 
     star_sprites.draw(display_surface)
     all_sprites.draw(display_surface)
+
+    # collisions
+    
 
     pygame.display.update()
 
