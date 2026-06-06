@@ -6,29 +6,36 @@ from settings import WIDTH, HEIGHT
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, groups, laser_surf, laser_groups, laser_sound):
+    def __init__(self, groups, laser_surf, laser_groups, laser_sound, damage_sound):
         super().__init__(groups)
         self.image = pygame.image.load(join('sprites', 'player.png')).convert_alpha()
         self.rect = self.image.get_frect(center=(WIDTH / 2, HEIGHT / 2))
         self.direction = pygame.Vector2()
         self.speed = 300
 
-        # Lives attributes
-        self.lives = 3
-        self.invincible = False
-        self.hit_time = 0
-        self.invincible_duration = 0
-
-        # Dependencies the player needs in order to fire a laser.
-        # Passed in instead of grabbed from globals.
+        # Sound & Laser Attributes
         self.laser_surf = laser_surf
         self.laser_groups = laser_groups
         self.laser_sound = laser_sound
+        self.damage_sound = damage_sound
 
         # Timer / Cooldown
         self.can_shoot = True
         self.laser_shoot_time = 0
         self.cooldown_duration = 400  # In MS
+
+        # Lives / damage
+        self.lives = 3
+        self.invincible = False
+        self.hit_time = 0
+        self.invincible_duration = 1500  # ms of i-frames after a hit
+
+        # Two prebuilt versions of the sprite. set_alpha is unreliable on
+        # convert_alpha() surfaces, so we make a faded copy with BLEND_RGBA_MULT
+        # and just swap self.image between them to flash.
+        self.original_image = self.image
+        self.faded_image = self.image.copy()
+        self.faded_image.fill((255, 255, 255, 100), special_flags=pygame.BLEND_RGBA_MULT)
 
         # Mask
         self.mask = pygame.mask.from_surface(self.image)
@@ -38,6 +45,19 @@ class Player(pygame.sprite.Sprite):
             current_time = pygame.time.get_ticks()
             if current_time - self.laser_shoot_time >= self.cooldown_duration:
                 self.can_shoot = True
+
+    def invincibility_timer(self):
+        if self.invincible:
+            if pygame.time.get_ticks() - self.hit_time >= self.invincible_duration:
+                self.invincible = False
+                self.image = self.original_image
+
+    def take_damage(self):
+        if not self.invincible:
+            self.lives -= 1
+            self.invincible = True
+            self.hit_time = pygame.time.get_ticks()
+            self.damage_sound.play()
 
     def update(self, dt: float):
         keys = pygame.key.get_pressed()
@@ -57,18 +77,14 @@ class Player(pygame.sprite.Sprite):
             self.laser_sound.play()
 
         self.laser_timer()
-    
-    def invincibility_timer(self):
+        self.invincibility_timer()
+
+        # Flashes from white to orig to notify that a player is currently invincible
         if self.invincible:
-            if pygame.time.get_ticks() - self.hit_time >= self.invincible_duration:
-                self.invincible = False
-                self.image.set_alpha(255)
-    
-    def take_damage(self):
-        if not self.invincible:
-            self.lives -= 1
-            self.invincible = True
-            self.hit_time = pygame.time.get_ticks()
+            if (pygame.time.get_ticks() // 100) % 2 == 0:
+                self.image = self.faded_image
+            else:
+                self.image = self.original_image
 
 
 class Star(pygame.sprite.Sprite):

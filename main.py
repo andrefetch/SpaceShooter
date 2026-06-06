@@ -19,7 +19,7 @@ def start_game():
     # Rebuild the scene
     for _ in range(40):
         Star([star_sprites, all_sprites])
-    player = Player(all_sprites, laser_surf, (all_sprites, laser_sprites), laser_sound)
+    player = Player(all_sprites, laser_surf, (all_sprites, laser_sprites), laser_sound, damage_sound)
 
     # Start spawning asteroids and reset the score clock
     pygame.time.set_timer(asteroid_event, randint(150, 300))
@@ -30,9 +30,12 @@ def start_game():
 def collisions():
     global game_state
 
-    if pygame.sprite.spritecollide(player, asteroid_sprites, True, pygame.sprite.collide_mask):
-        game_state = "title"
-        pygame.time.set_timer(asteroid_event, 0)  # stop spawning asteroids
+    if not player.invincible:
+        if pygame.sprite.spritecollide(player, asteroid_sprites, True, pygame.sprite.collide_mask):
+            player.take_damage()
+            if player.lives <= 0:
+                game_state = "title"
+                pygame.time.set_timer(asteroid_event, 0) # Stop asteroids from spawning.
 
     for laser in laser_sprites:
         if pygame.sprite.spritecollide(laser, asteroid_sprites, True, pygame.sprite.collide_mask):
@@ -60,6 +63,11 @@ def display_title():
         prompt_rect = prompt_surf.get_frect(center=(WIDTH / 2, HEIGHT / 2 + 40))
         display_surface.blit(prompt_surf, prompt_rect)
 
+def display_lives():
+    text_surf = font.render(f"Lives: {player.lives}", False, "#d4d4d4")
+    text_rect = text_surf.get_frect(topleft = (20, 20))
+    display_surface.blit(text_surf, text_rect)
+
 # General setup
 pygame.init()
 display_surface = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -82,11 +90,13 @@ title_font = pygame.font.Font(join('sprites', 'HomeVideo.ttf'), 80)
 laser_sound = pygame.mixer.Sound(join('sprites', 'audio', 'laser.wav'))
 explosion_sound = pygame.mixer.Sound(join('sprites', 'audio', 'explosion.wav'))
 game_music_sound = pygame.mixer.Sound(join('sprites', 'audio', 'game_music.wav'))
+damage_sound = pygame.mixer.Sound(join('sprites', 'audio', 'damage.ogg'))
 
 laser_sound.set_volume(0.2)
 explosion_sound.set_volume(0.2)
 game_music_sound.set_volume(0.1)
 game_music_sound.play(loops=-1)
+damage_sound.set_volume(0.2)
 
 # Sprite groups
 all_sprites = pygame.sprite.Group()
@@ -133,6 +143,7 @@ while running:
     elif game_state == "playing":
         all_sprites.update(dt)
         collisions()
+        display_lives()
         star_sprites.draw(display_surface)
         display_score()
         all_sprites.draw(display_surface)
