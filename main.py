@@ -31,7 +31,7 @@ class Player(pygame.sprite.Sprite):
 
         recent_keys = pygame.key.get_just_pressed()
         if recent_keys[pygame.K_SPACE] and self.can_shoot:
-            Laser(laser_surf, self.rect.midtop, all_sprites)
+            Laser(laser_surf, self.rect.midtop, (all_sprites, laser_sprites))
             self.can_shoot = False
             self.laser_shoot_time = pygame.time.get_ticks()
         
@@ -78,6 +78,19 @@ class Asteroid(pygame.sprite.Sprite):
         if pygame.time.get_ticks() - self.start_time >= self.lifetime:
             self.kill()
 
+def collisions():
+
+    global running
+
+    collision_sprites = pygame.sprite.spritecollide(player, asteroid_sprites, True)
+    if collision_sprites:
+        running = False
+
+    for laser in laser_sprites:
+        collied_sprites = pygame.sprite.spritecollide(laser, asteroid_sprites, True)
+        if collied_sprites:
+            laser.kill()
+
 # General Setup
 pygame.init() 
 WIDTH = 1280
@@ -98,6 +111,7 @@ background_surf = pygame.transform.scale(background_surf, (WIDTH, HEIGHT))
 star_sprites = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 asteroid_sprites = pygame.sprite.Group()
+laser_sprites = pygame.sprite.Group()
 
 for _ in range(40):
     Star([star_sprites, all_sprites])
@@ -106,7 +120,7 @@ player = Player(all_sprites)
 
 # Custom events -- Meteors / Asteroids
 asteroid_event = pygame.event.custom_type()
-pygame.time.set_timer(asteroid_event, 500)
+pygame.time.set_timer(asteroid_event, randint(100, 300))
 
 # Drawing Screen
 while running:
@@ -126,9 +140,7 @@ while running:
 
     # update
     all_sprites.update(dt)
-    collision_sprites = pygame.sprite.spritecollide(player, asteroid_sprites, True)
-    if collision_sprites:
-        print(collision_sprites[0])
+    collisions()
 
     # draw the game, drawing matters in lines, display background first, then stars, then ship
     # display_surface.fill('darkgray')
@@ -136,10 +148,7 @@ while running:
 
     star_sprites.draw(display_surface)
     all_sprites.draw(display_surface)
-
-    # collisions
     
-
     pygame.display.update()
 
 pygame.quit()
