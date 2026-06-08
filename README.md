@@ -8,7 +8,7 @@ Space shooter is a top-down recreation of a popular game called "Asteroids" it c
 
 ## How to play?
 
-It's a pretty easy game to play you can use "WASD" for movement and "Space" to shoot your laser at asteroids!
+It's a pretty easy game to play you can use "WASD" or any of the "↑ ↓ ← → (arrow keys)" for movement and "Space" to shoot your laser at asteroids!
 
 ## How do I compile it to play?
 
