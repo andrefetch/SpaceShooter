@@ -37,3 +37,7 @@ It's a pretty easy game to play you can use "WASD" or any of the "↑ ↓ ← �
    ```
 
 4. Open the terminal in it's root directory of the cloned folder you have which would be `Space-Shooter/` and run `uv run main.py` and you're all set!
+
+## Open.. Sourced!
+
+This game is completely open-sourced, you can fork / clone it if you'd like to create your own powerups, change settings in the game, or learn from it! This project utilizes the object oriented paradigm in programming, so if you'd like to learn, or improve on my codebase, feel free!
