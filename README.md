@@ -4,7 +4,7 @@
 
 ## Description
 
-Space shooter is a top-down recreation of a popular game called "Asteroids" it contains a ship that can be controlled, a laser that can be shot, and asteroids to break apart!
+Space shooter is a top-down recreation of a popular game called "Asteroids" it contains a ship that can be controlled, a laser that can be shot, and asteroids to break apart! Contains new powerups to unlock when you collide with a lucky block! With a range of special abilities to help aid your battle with destorying asteroids in space!
 
 ## How to play?
 
