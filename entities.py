@@ -160,3 +160,23 @@ class AnimatedExplosion(pygame.sprite.Sprite):
             self.image = self.frames[int(self.frame_index)]
         else:
             self.kill()
+
+'''
+Powerups
+'''
+
+class PowerUp(pygame.sprite.Sprite):
+
+    image_path = None
+
+    def __init__(self, pos, groups): 
+        super().__init__(groups)
+        self.image = pygame.image.load(self.image_path).convert_alpha()
+        self.rect = self.image.get_frect(center = pos)
+        self.velocity = pygame.Vector2(0, 50)
+    
+    def update(self, dt):
+        self.rect.center += self.velocity * dt
+    
+    def apply(self, player):
+        raise NotImplementedError # so each child class can define it's own effect
