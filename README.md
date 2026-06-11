@@ -12,7 +12,7 @@ It's a pretty easy game to play you can use "WASD" or any of the "↑ ↓ ← �
 
 ## How do I compile it to play?
 
-1. Clone the repo by:
+1. Clone the repo by doing:
 
    ```bash
    $ git clone https://github.com/andrefetch/SpaceShooter.git
